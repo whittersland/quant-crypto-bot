@@ -1,0 +1,9 @@
+*.pem
+*.key
+.env
+*_state.json
+__pycache__/
+*.pyc
+venv/
+logs/*.log
+.DS_Store
