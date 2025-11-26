@@ -1,0 +1,143 @@
+# Dual-Condition Algorithmic Trading System Configuration
+# Version 1.1 - LIVE TRADING WITH FUTURES SUPPORT
+#
+# ⚠️  IMPORTANT: Add your Coinbase API credentials below
+# ⚠️  Test in simulated mode first: python main.py --test
+
+exchange:
+  name: "coinbase"
+  api_url: "https://api.coinbase.com"
+  websocket_url: "wss://advanced-trade-ws.coinbase.com"
+
+# ============================================================
+# API CREDENTIALS - REQUIRED FOR LIVE TRADING
+# ============================================================
+# Option 1: Set directly here (less secure)
+# Option 2: Use environment variables (recommended)
+#   export COINBASE_API_KEY="your-key"
+#   export COINBASE_API_SECRET="your-secret"
+# ============================================================
+credentials:
+  api_key: "${COINBASE_API_KEY}"
+  api_secret: "${COINBASE_API_SECRET}"
+
+# ============================================================
+# CAPITAL CONFIGURATION
+# ============================================================
+capital: 360.65  # Your starting capital in USD
+
+trading:
+  # Spot symbols (used for analysis and LONG trades)
+  symbols:
+    - "BTC-USD"
+    - "ETH-USD"
+    - "SOL-USD"
+  
+  # Trading mode: "spot_only", "futures_only", or "hybrid"
+  # - spot_only: Only BUY/SELL spot (no shorting)
+  # - futures_only: Use futures contracts for all trades (LONG and SHORT)
+  # - hybrid: LONG via spot, SHORT via futures (RECOMMENDED - most flexible)
+  mode: "hybrid"
+  
+  # Leverage for futures trading (Coinbase supports up to 10x)
+  # Higher leverage = smaller margin required per contract
+  # 10x means 1 nano BTC contract (~$970) only needs ~$97 margin
+  leverage: 10
+  
+position_sizing:
+  # For futures with 10x leverage:
+  # - $100 margin = $1000 notional = 1 BTC nano contract
+  # - $50 margin = $500 notional = 1-2 ETH nano contracts
+  base_min: 50
+  base_max: 150
+  increment: 10
+  max_concurrent_positions: 3
+  profit_check_hours: 24
+
+risk_management:
+  # TIGHTER STOPS for 10x leverage
+  # A 5% move against you = 50% loss of margin
+  trailing_stop_percent: 6       # Was 12 - tighter trailing stop
+  daily_loss_limit_percent: 10   # Was 15 - stop trading sooner
+  max_drawdown_percent: 20       # Was 25 - lower max drawdown
+  position_stop_loss_percent: 4  # Was 8 - tighter stop loss (4% move = 40% margin loss)
+  take_profit_tiers:
+    - threshold: 15              # Was 25 - take profits sooner
+      take_percent: 30
+    - threshold: 30              # Was 50
+      take_percent: 40
+    - threshold: 50              # Was 100
+      take_percent: 50
+
+loops:
+  main_interval_minutes: 10
+  scanner_interval_minutes: 3
+  # HIGH CONFIDENCE THRESHOLDS for 10x leverage
+  # Only execute trades with very high conviction
+  scanner_confidence_threshold: 0.70  # Was 0.25 - now requires 70%+ confidence
+  main_confidence_threshold: 0.65     # Was 0.15 - now requires 65%+ confidence
+
+strategies:
+  # Standard strategies
+  momentum:
+    enabled: true
+    weight: 0.15
+    lookback_periods: [3, 5, 10, 20]
+    
+  mean_reversion:
+    enabled: true
+    weight: 0.15
+    bb_period: 20
+    bb_std: 2.0
+    rsi_period: 14
+    rsi_oversold: 30
+    rsi_overbought: 70
+    
+  volatility_breakout:
+    enabled: true
+    weight: 0.15
+    atr_period: 14
+    breakout_multiplier: 1.5
+    
+  volume_analysis:
+    enabled: true
+    weight: 0.10
+    volume_ma_period: 20
+    volume_spike_threshold: 2.0
+    
+  trend_following:
+    enabled: true
+    weight: 0.15
+    ema_fast: 9
+    ema_slow: 21
+    ema_trend: 50
+    
+  # Novel dual-condition strategies
+  confluence_convergence:
+    enabled: true
+    weight: 0.10
+    min_confirmations: 3
+    indicator_families: ["trend", "momentum", "volatility"]
+    
+  cross_asset_resonance:
+    enabled: true
+    weight: 0.10
+    correlation_threshold: 0.7
+    min_assets_aligned: 3
+    
+  temporal_alignment:
+    enabled: true
+    weight: 0.10
+    timeframes: [1, 5, 15]
+    min_timeframes_aligned: 3
+
+logging:
+  level: "INFO"
+  file: "trading_system.log"
+  max_size_mb: 100
+  backup_count: 5
+
+monitoring:
+  heartbeat_seconds: 60
+  alert_on_error: true
+  performance_log_interval: 3600

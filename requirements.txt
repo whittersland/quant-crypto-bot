@@ -1,0 +1,18 @@
+# Dual-Condition Algorithmic Trading System
+# Requirements
+
+# Async HTTP
+aiohttp>=3.9.0
+
+# Configuration
+pyyaml>=6.0
+
+# Numerical computing
+numpy>=1.24.0
+
+# JWT Authentication (for Coinbase API)
+PyJWT>=2.8.0
+cryptography>=41.0.0
+
+# Logging (colorama for colored output)
+colorama>=0.4.6
